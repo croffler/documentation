@@ -1,0 +1,45 @@
+---
+layout: post
+title:  Configuring Space Gateway Targets
+categories: XAP97
+parent: multi-site-replication-over-the-wan.html
+weight: 300
+---
+
+{% summary %}This page explains how to configure replication gateway targets of a space.{% endsummary %}
+
+{% info %}
+This page assume prior knowledge of multi-site replication, please refer to [Multi-Site Replication (WAN)](./multi-site-replication-over-the-wan.html) before reading this page.
+{% endinfo %}
+
+# Overview
+
+Each space that is replicating to another space (or spaces) is actually replicating to the local gateway of the target space, and that gateway is in charge of dispatching the replication to the relevant partitions. Such replicating space needs be configured with the name of each of the target gateways and replication related parameters per gateway or for all gateways.
+
+Here is an example of how this configuration should look:
+
+{% highlight xml %}
+<os-core:space id="space" url="/./myNYSpace"
+  gateway-targets="gatewayTargets"/>
+
+<os-gateway:targets id="gatewayTargets" local-gateway-name="NEWYORK"
+  idle-time-threshold="3000" bulk-size="1000" max-redo-log-capacity="1000000">
+  <os-gateway:target name="LONDON" />
+  <os-gateway:target name="HONGKONG" bulk-size="100"/>
+</os-gateway:targets>
+{% endhighlight %}
+
+Each configuration can be configured for all gateways or specifically per each gateway as seen in the above example, max-redo-log-capacity is configured for all gateways while bulk-size is specifically overridden in the configuration of HONGKONG gateway target. A recommended reading regarding the replication redo-log is [Controlling the Replication Redo Log](./controlling-the-replication-redo-log.html).
+
+# Configurable Parameters
+
+{: .table .table-bordered}
+|Property|Description|Default|
+|:-------|:----------|:------|
+|bulk-size|Specifies the size of each replication bulk in terms of replication packets| 100 packets |
+|pending-operation-threshold|Specifies the threshold of number of packets that are pending replication that once breached, a replication bulk will be transmitted | 100 packets |
+|idle-time-threshold|Specifies the maximum time to wait since the last time a replication bulk was transmitted, once elapsed, a replication bulk will be transmitted even if the `pending-operation-threshold` is not reached| 1000 miliseconds |
+|max-redo-log-capacity|Specifies the maximum number of packets that should be held in the redo-log for a replication gateway (-1 means unlimited) | 100,000,000 |
+|on-redo-log-capacity-exceeded| `drop-oldest` will result in dropping the oldest packet in the redo-log once the capacity is exceeded, `block-operations` will result in blocking all new replicated operations by denying such new operation by throwing an exception to the operation invoker. | `drop-oldest` |
+
+If one of the gateway targets name matches the local-gateway-name, it will be filtered and removed from the list at deploy time. This may be helpful for creating symmetric configuration which is demonstrated at [Multi-Site Replication (WAN)](./multi-site-replication-over-the-wan.html) page.
