@@ -1,13 +1,13 @@
 ---
 layout: post
-title:  Operations
+title:  Basic Operations
 categories: XAP97
 parent: the-space.html
 weight: 3000
 ---
 
 
-{% summary %}Describes the main XAP API for interacting with the space{% endsummary %}
+{% summary %}Describes the basic XAP API for interacting with the space{% endsummary %}
 
 # Overview
 
@@ -15,6 +15,36 @@ XAP provides a simple space API using the [GigaSpace](http://www.gigaspaces.com/
 
 
 The interface includes the following main operations:
+
+Write and update operations:
+
+- write
+- writeMultiple
+- change
+- asyncChange
+
+Read operations:
+
+- readById
+- readByIds
+- readIfExistsById
+- readMultiple
+- readIfExists
+- asyncRead
+
+Take operations:
+
+- take
+- takeMultiple
+- takeIfExistsById
+- takeIfExists
+- asyncTake
+
+- clear
+- count
+
+
+
 
 {: .table .table-bordered}
 |[Id Based operations](./id-queries.html)|[Batch operations](#Batch Operations)|[Asynchronous operations](#Asynchronous Operations)|Data Count operations|

@@ -1,13 +1,13 @@
 ---
 layout: post
-title:  Space Mode Context Loader
+title:  Context Loader
 categories: XAP97
-parent: the-space-component.html
-weight: 300
+parent: the-space.html
+weight: 6000
 ---
 
-{% compositionsetup %}
-{% summary page|60 %}Allows you to load a Spring application context only when the Processing Unit or space is in primary mode, and unload it when the Processing Unit or space is in backup mode.{% endsummary %}
+
+{% summary %}Allows you to load a Spring application context only when the Processing Unit or space is in primary mode, and unload it when the Processing Unit or space is in backup mode.{% endsummary %}
 
 # Overview
 

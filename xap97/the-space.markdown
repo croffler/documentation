@@ -6,10 +6,7 @@ weight: 150
 parent: programmers-guide.html
 ---
 
-{%comment%}
- getting-started.html
- 50
-{%endcomment%}
+
 
 {% summary %}A Space is a logical in-memory service, which can store entries of information.{% endsummary %}
 
@@ -25,6 +22,12 @@ The space is accessed via a programmatic interface which supports the following 
 - Read – read the contents of a stored entry into the client side.
 - Take – get the value from the space and delete its content.
 - Notify – alert when the contents of an entry of interest have registered changes.
+
+{%learn%}./the-space-operations.html{%endlearn%}
+
+The space proxy is created through the `UrlSpaceConfigurer`. Several configuration parameters are available.
+
+{%learn%}./the-space-configuration.html{%endlearn%}
 
 
 # Embedded Space
@@ -126,7 +129,7 @@ GigaSpace gigaSpace = new GigaSpaceConfigurer(new UrlSpaceConfigurer("jini://*/*
 {% endinittab %}
 
 {%info%}
-A full description of the Space URL Properties can be found [here.](./the-space-url.html)
+A full description of the Space URL Properties can be found [here.](./the-space-configuration.html)
 {%endinfo%}
 
 
@@ -159,7 +162,7 @@ GigaSpace localCache = new GigaSpaceConfigurer(localCacheConfigurer).gigaSpace()
 {% endhighlight %}
 
 {% endtabcontent %}
-{% tabcontent Spring Namespace Configuration %}
+{% tabcontent   Namespace   %}
 
 {% highlight xml %}
 <os-core:space id="space" url="jini://*/*/space" />
@@ -168,7 +171,7 @@ GigaSpace localCache = new GigaSpaceConfigurer(localCacheConfigurer).gigaSpace()
 {% endhighlight %}
 
 {% endtabcontent %}
-{% tabcontent Plain Spring XML %}
+{% tabcontent Plain XML %}
 
 {% highlight xml %}
 <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
@@ -210,7 +213,7 @@ GigaSpace localView = new GigaSpaceConfigurer(localViewConfigurer).gigaSpace();
 {% endhighlight %}
 
 {% endtabcontent %}
-{% tabcontent Spring Namespace Configuration %}
+{% tabcontent   Namespace   %}
 
 {% highlight xml %}
 <os-core:space id="space" url="jini://*/*/space" />
@@ -224,7 +227,7 @@ GigaSpace localView = new GigaSpaceConfigurer(localViewConfigurer).gigaSpace();
 {% endhighlight %}
 
 {% endtabcontent %}
-{% tabcontent Plain Spring XML %}
+{% tabcontent Plain XML %}
 
 {% highlight xml %}
 <bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
@@ -251,130 +254,167 @@ GigaSpace localView = new GigaSpaceConfigurer(localViewConfigurer).gigaSpace();
 {% endinittab %}
 
 
-# Space URL
+# Security
 
-A **Space URL** is a string that represents an address of a space. In short, there are two forms of space URLs:
+A secured space should be configured with a security context so that it can be accessed (when connecting to it remotely). Here is an example of how this can be configured:
 
-* **Embedded** (e.g. `/./mySpace`) - Find an embedded (in-process) space called *mySpace*. If it doesn't exist it will be created automatically.
-* **Remote** (e.g. `jini://*/*/mySpace`) - Find a remote space (hosted outside this process) called *mySpace*. If it doesn't exist an exception will be thrown.
-
-The easiest way to create or find a space is to leverage XAP's integration with Spring, as explained in [The Space Component](the-space-component.html).
-
-{%comment%}
-If you prefer to use pure code without spring, use the [Configurer API](./programmatic-api-(configurers).html).
-{%endcomment%}
-
-#### Embedded Space
-
-An **Embedded** space is a space that is hosted in your process. The URL format for locating such a space is:
-{% highlight xml %}
-/./<spaceName><?key1=val1><&keyN=valN>
-{% endhighlight %}
-
-For example, to find an embedded space called `foo` use `/./foo`.
-
-If the requested space does not exist, it is automatically created and returned. If you wish to look for an existing space only, use `create=false` property (e.g. `/./foo?create=false`) - this will throw an exception if the requested space does not exist.
-
-#### Remote Space
-
-A **Remote** space is a space that is hosted in a different process. The URL format for locating such a space is:
+{% inittab os_simple_space|top %}
+{% tabcontent Namespace %}
 
 {% highlight xml %}
-jini://<hostName>:<port>/<containerName>/<spaceName><?key1=val1><&keyN=valN>
+
+<os-core:space id="space" url="jini://*/*/space">
+    <os-core:security username="sa" password="adaw@##$" />
+</os-core:space>
 {% endhighlight %}
 
-For example, to find a remote space called `foo` use `jini://*/*/foo`.
-
-Let's examine that format:
-
-* `jini://` - The prefix indicates to search for the space using the *JINI Lookup Service* protocol.
-* `<hostName>:<port>` - Address of the JINI Lookup Service. Use `*` for multicast search, or specify a list of hostnames/ip addresses.
-* `<containerName>` - Indicates a specific member in the cluster to find. Use `*` for finding any cluster member.
-* `<spaceName>` - Name of space to find.
-
-{%children%}
-
-{%comment%}
-
-# Basic Properties
-
-There are multiple runtime configurations you may use when interacting with the space:
-
-The Space support the following basic properties:
-
-
-{: .table .table-bordered}
-|Property |Description|Default|
-|:-----------|:-----------------|:----------|:------|
-|lookupGroups|The Jini Lookup Service group to use when running in multicast discovery mode. you may specify multiple groups comma separated| gigaspaces-X.X.X-XAP<Release>-ga |
-
-
-{% togglecloak id=1 %}**Example**{% endtogglecloak %}
-{% gcloak 1 %}
-{% inittab os_simple_space|top %}
-{% tabcontent java %}
-{%highlight java%}
-UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer("/./space").lookupGroups("test");
-GigaSpace gigaSpace = new GigaSpaceConfigurer(urlSpaceConfigurer).gigaSpace();
-{%endhighlight%}
 {% endtabcontent %}
-{% tabcontent Name Space %}
-{%highlight xml%}
- <os-core:space id="space" url="/./space" />
- <os-core:giga-space id="gigaSpace" space="space" lookupGroups="test"
- </os-core:giga-space>
-{%endhighlight%}
+{% tabcontent Plain XML %}
+
+{% highlight xml %}
+
+<bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+    <property name="url" value="jini://*/*/space" />
+    <property name="securityConfig">
+        <bean class="org.openspaces.core.space.SecurityConfig">
+            <property name="username" value="sa" />
+            <property name="password" value="adaw@##$" />
+        </bean>
+    </property>
+</bean>
+{% endhighlight %}
+
 {% endtabcontent %}
 {% endinittab %}
-{% endgcloak %}
 
-{: .table .table-bordered}
-|Property|Description|Default|
-|:-----------------|:----------|:------|
-|lookupLocators |The Jini Lookup locators to use when running in unicast discovery mode. In the form of: host1:port1,host2:port2.| |
+Here is an example of how to define security with an embedded space. In this case, we enable security and specify the username and password.
 
-{% togglecloak id=2 %}**Example**{% endtogglecloak %}
-{% gcloak 2 %}
 {% inittab os_simple_space|top %}
-{% tabcontent java %}
-{%highlight java%}
-UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer(url).lookupLocators("192.165.1.21:7888, 192.165.1.22:7888");
-GigaSpace gigaSpace = new GigaSpaceConfigurer(urlSpaceConfigurer).gigaSpace();
-{%endhighlight%}
+{% tabcontent Namespace %}
+
+{% highlight xml %}
+
+<os-core:space id="space" url="/./space">
+    <os-core:security username="sa" password="adaw@##$" />
+</os-core:space>
+{% endhighlight %}
+
 {% endtabcontent %}
-{% tabcontent Name Space %}
-{%highlight xml%}
- <os-core:space id="space" url="/./space" />
- <os-core:giga-space id="gigaSpace" space="space" lookupLocators="192.165.1.21:7888, 192.165.1.22:7888"
- </os-core:giga-space>
-{%endhighlight%}
+{% tabcontent Plain XML %}
+
+{% highlight xml %}
+
+<bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+    <property name="url" value="/./space" />
+    <property name="securityConfig">
+        <bean class="org.openspaces.core.space.SecurityConfig">
+            <property name="username" value="sa" />
+            <property name="password" value="adaw@##$" />
+        </bean>
+    </property>
+</bean>
+{% endhighlight %}
+
 {% endtabcontent %}
 {% endinittab %}
-{% endgcloak %}
+
+It is possible to configure the space to be secured using deploy time properties (bean level properties), without declaring the security element. The `security.username` and `security.password` can be provided, and the spaces defined within the processing unit are automatically secured.
+
+{%learn %}./security.html{%endlearn %}
 
 
-{: .table .table-bordered}
-|Property|Description|Default|Time Unit
-|:-----------------|:----------|:------|:--------|
-|lookupTimeout |The max timeout in milliseconds to use when running in multicast discovery mode to find a lookup service| 5000 | milliseconds |
+# Persistency
 
-{% togglecloak id=3 %}**Example**{% endtogglecloak %}
-{% gcloak 3 %}
+When constructing a space, it is possible to provide [Space Persistency](./space-persistency.html) extensions using Spring-based configuration (instead of using the space schema). Here is an example of how it can be defined:
+
 {% inittab os_simple_space|top %}
-{% tabcontent java %}
-{%highlight java%}
-UrlSpaceConfigurer urlSpaceConfigurer = new UrlSpaceConfigurer(url).lookupTimeout(1000);
-GigaSpace gigaSpace = new GigaSpaceConfigurer(urlSpaceConfigurer).gigaSpace();
-{%endhighlight%}
+{% tabcontent Namespace %}
+
+{% highlight xml %}
+
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+    <property name="url" value="jdbc:hsqldb:hsql://localhost:9001"/>
+    <property name="username" value="sa"/>
+    <property name="password" value=""/>
+</bean>
+
+<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+    <property name="mappingResources">
+        <list>
+            <value>Person.hbm.xml</value>
+        </list>
+    </property>
+    <property name="hibernateProperties">
+        <props>
+            <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+            <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+            <prop key="hibernate.cache.use_second_level_cache">false</prop>
+            <prop key="hibernate.cache.use_query_cache">false</prop>
+            <prop key="hibernate.hbm2ddl.auto">update</prop>
+        </props>
+    </property>
+</bean>
+
+<bean id="hibernateSpaceDataSource" class="com.gigaspaces.datasource.hibernate.DefaultHibernateSpaceDataSource">
+    <property name="sessionFactory" ref="sessionFactory"/>
+</bean>
+
+<os-core:space id="space" url="/./space" schema="persistent" space-data-source="hibernateSpaceDataSource" />
+{% endhighlight %}
+
 {% endtabcontent %}
-{% tabcontent Name Space %}
-{%highlight xml%}
- <os-core:space id="space" url="/./space" />
- <os-core:giga-space id="gigaSpace" space="space" lookupTimout="1000"
- </os-core:giga-space>
-{%endhighlight%}
+{% tabcontent Plain XML %}
+
+{% highlight xml %}
+
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+    <property name="url" value="jdbc:hsqldb:hsql://localhost:9001"/>
+    <property name="username" value="sa"/>
+    <property name="password" value=""/>
+</bean>
+
+<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+    <property name="dataSource" ref="dataSource"/>
+    <property name="mappingResources">
+        <list>
+            <value>Person.hbm.xml</value>
+        </list>
+    </property>
+    <property name="hibernateProperties">
+
+        <props>
+            <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+            <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+            <prop key="hibernate.cache.use_second_level_cache">false</prop>
+            <prop key="hibernate.cache.use_query_cache">false</prop>
+            <prop key="hibernate.hbm2ddl.auto">update</prop>
+        </props>
+    </property>
+</bean>
+
+<bean id="hibernateSpaceDataSource" class="com.gigaspaces.datasource.hibernate.DefaultHibernateSpaceDataSource">
+    <property name="sessionFactory" ref="sessionFactory"/>
+</bean>
+
+<bean id="space" class="org.openspaces.core.space.UrlSpaceFactoryBean">
+    <property name="url" value="/./space" />
+    <property name="scheam" value="persistent" />
+    <property name="spaceDataSource" ref="hibernateSpaceDataSource" />
+</bean>
+{% endhighlight %}
+
 {% endtabcontent %}
 {% endinittab %}
-{% endgcloak %}
 
-{%endcomment%}
+The above example uses Spring built-in support for configuring both a custom JDBC `DataSource` and a Hibernate `SessionFactory` to define and use the GigaSpaces built-in `HibernateSpaceDataSource`. The GigaSpaces data source is then injected into the space construction (note the specific schema change), and causes the space to use it.
+
+
+
+{% info %}
+This configuration can also be used with the GigaSpaces [Mirror Service](./asynchronous-persistency-with-the-mirror.html) deployed as a Processing Unit.
+{%endinfo%}
+
+{%learn%}space-persistency.html{%endlearn%}

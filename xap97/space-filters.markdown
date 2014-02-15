@@ -1,8 +1,8 @@
 ---
 layout: post
 title:  Space Filters
-categories: XAP97
-parent: the-space-component.html
+categories:
+parent:
 weight: 100
 ---
 

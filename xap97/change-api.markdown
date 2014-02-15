@@ -2,8 +2,8 @@
 layout: post
 title:  Change API
 categories: XAP97
-parent: the-gigaspace-interface.html
-weight: 100
+parent: the-space.html
+weight: 3100
 ---
 
 
@@ -13,16 +13,18 @@ weight: 100
 {%section%}
 {%column width=50% %}
 The [GigaSpace.change](http://www.gigaspaces.com/docs/JavaDoc{% currentversion %}/org/openspaces/core/GigaSpace.html) and the [ChangeSet](http://www.gigaspaces.com/docs/JavaDoc{% currentversion %}/index.html?com/gigaspaces/client/ChangeSet.html) allows updating existing objects in space, by specifying only the required change instead of passing the entire updated object.
-Thus reducing required network traffic between the client and the space, and the network traffic generated from replicating the changes between the space instances (e.g between the primary space instance and its backup). Moreover, using this API also can prevent the need of reading the existing object prior to the change operation because the change operation can specify how to change the existing property without knowing its current value. For instance, implementing atomic [Counters](./counters.html) can be done by increasing a counter property of an integer property by some delta. Another example would be to add a value to a collection and so on.
+Thus reducing required network traffic between the client and the space, and the network traffic generated from replicating the changes between the space instances (e.g between the primary space instance and its backup).
 {%endcolumn%}
 {%column width=40% %}
 ![change-api.jpg](/attachment_files/change-api.jpg)
 {%endcolumn%}
 {%endsection%}
 
+
+Moreover, using this API also can prevent the need of reading the existing object prior to the change operation because the change operation can specify how to change the existing property without knowing its current value. For instance, implementing atomic [Counters](./counters.html) can be done by increasing a counter property of an integer property by some delta. Another example would be to add a value to a collection and so on.
 The change API supports [transactions](./transaction-management.html) in the same way the other space operation supports it, using a transactional `GigaSpace` instance.
 
-# Basic Usage Example
+# Example
 
 The following example demonstrates how to increase the property 'count' in a an object of type 'WordCount' with id 'the' by one.
 
@@ -33,11 +35,11 @@ IdQuery<WordCount> idQuery = new IdQuery<WordCount>(WordCount.class, id, routing
 space.change(idQuery, new ChangeSet().increment("count", 1));
 {% endhighlight %}
 
-# The Query Template
+# Query Template
 
 The change operation may receive any [query template](./querying-the-space.html) for matching a single or multiple objects that needs to be changed by the operation.
 
-# The Change Set
+# Change Set
 
 The change operation requires a [ChangeSet](http://www.gigaspaces.com/docs/JavaDoc{% currentversion %}/index.html?com/gigaspaces/client/ChangeSet.html) which described the changes that needs to be done once locating the object specified by the query template.
 The [ChangeSet](http://www.gigaspaces.com/docs/JavaDoc{% currentversion %}/index.html?com/gigaspaces/client/ChangeSet.html) contains a predefined set of operations that can be invoked to alter the object, the set may contain one or more changes that will be applied sequentially to the object.
@@ -74,7 +76,7 @@ IdQuery<Account> idQuery = new IdQuery<Account>(Account.class, id, routing);
 space.change(idQuery, new ChangeSet().increment("balance.euro", 5.2D));
 {% endhighlight %}
 
-## Change Path Specification
+## Path Specification
 
 Each operation in the change set acts on a specified string path. This path points to the property that needs to be changed and it has the following semantic:
 
@@ -105,7 +107,7 @@ space.change(idQuery, new ChangeSet().increment("balance.euro", 5.2D));
 
 In this case the key euro inside the map behind the balance will be increased by 5.2.
 
-## Available Change Set Operations
+## Available Operations
 
 {: .table .table-bordered}
 |Operation Name|Description|Semantics|
@@ -120,7 +122,7 @@ In this case the key euro inside the map behind the balance will be increased by
 |**putInMap**|puts a key value pair in a map property|The key and value are put into a map by applying the `Map.put` operation with the given key and value on the map behind the property, if the property do not exists an exception will be thrown|
 |**removeFromMap**|removes a key and its associated value from a map property|The key is removed from a map by applying the `Map.remove` operation with the given key on the map behind the property, if the property do not exists an exception will be thrown|
 
-# Using Change with the Embedded model
+# With the Embedded model
 
 With the [embedded model](./modeling-your-data.html#Embedded vs. Non-Embedded Relationships), updating (as well adding or removing) a nested collection with large number of elements **must use the change API** since the default behavior would be to replicate the entire space object and its nested collection elements from the primary to the backup (or other replica primary copies when using the sync-replicate or the async-replicated cluster schema). The Change API reduces the CPU utilization at the primary side, reduce the serialization overhead and reduce the garbage collection activity both at the primary and backup. This improves the overall system stability significantly.
 
@@ -264,7 +266,7 @@ catch(ChangeException e)
 }
 {% endhighlight %}
 
-# Change and Optimistic Locking
+# Optimistic Locking
 
 The `change` operation has the same semantics as regular space `update` operation when it comes to [Optimistic Locking](./optimistic-locking.html). It will increase the version of the changed object and the expected version can be specified in the id query when optimistic locking is needed.
 
@@ -294,13 +296,15 @@ catch(ChangeException e)
 }
 {% endhighlight %}
 
-{% exclamation %} In order to prevent constructor overload ambiguity, when using id query with version, the space routing property needs to be specified as well. If the object has no space routing then its space id property is the routing property and it should be used as shown in the previous example.
+{% info %}
+In order to prevent constructor overload ambiguity, when using id query with version, the space routing property needs to be specified as well. If the object has no space routing then its space id property is the routing property and it should be used as shown in the previous example.
+{%endinfo%}
 
-# Change and Notifications
+# Notifications
 
 Change will be delivered as a regular update notification, with the state of the object after the change was applied.
 
-# Change Modifiers
+# Modifiers
 
 The following modifiers can be used with the change operation
 
@@ -312,10 +316,14 @@ there is no guarantee whether the operation succeeded or not as this mode does n
 will propagate to the underlying external data source.
 
 # Asynchronous Change
-
+{%section%}
+{%column width=65% %}
 The `change` operation has also an asynchronous API, in which the operation is dispatched to the server and the result is returned asynchronously via a listener or a future.
-
+{%endcolumn%}
+{%column width=30% %}
 ![changeAsync-api.jpg](/attachment_files/changeAsync-api.jpg)
+{%endcolumn%}
+{%endsection%}
 
 This operation behaves exactly as the synchronous `change` except for the asynchronous result and it follows java standard asynchronous semantics.
 
@@ -352,20 +360,33 @@ AsyncFutureListener<ChangeResult<Account>> myListener = new AsyncFutureListener<
 space.asyncChange(idQuery, new ChangeSet().increment("balance.euro", 5.2D), myListener);
 {% endhighlight %}
 
-# Change and SpaceSynchronizationEndpoint
+# SpaceSynchronizationEndpoint
 
 A SpaceSynchronizationEndpoint implementation could support change operations and make use of lighter replication between the space and the mirror.
 For more information on how to implement it please read [Change API Advanced](./change-api-advanced.html)
 
-# Change and Replication Filter
+# Replication Filter
 
 Change passes through [Replication Filter](./cluster-replication-filters.html) like other operations and for example can be discarded on replication level.
 
 {% refer %}For more information on how to handle change in replication filters please read to [Change API Advanced](./change-api-advanced.html).{% endrefer %}
 
-# Change Extension
+# Add and Get operation
 
-See [Change Extension](./change-extension.html) which provide utility methods for common usage patterns.
+A common usage pattern is to increment a numeric property of a specific entry and needing the updated value after the increment was applied.
+Using the `addAndGet` operation you can do that using one method call and get an atomic add and get operation semantics.
+Following is an example of incrementing a property named `counter` inside an entry of type `WordCount`:
+
+{% highlight java %}
+GigaSpace space = // ... obtain a space reference
+Uuid id = ...;
+IdQuery<WordCount> idQuery = new IdQuery<WordCount>(WordCount.class, id, routing);
+Integer newCounter = ChangeExtension.addAndGet(space, idQuery, "counter", 1);
+{% endhighlight %}
+
+You should use the primitive wrapper types as the operation semantic is to return null if there is no object matching the provided id query
+
+{% info %}You can use `import static org.openspaces.extensions.ChangeExtension.` in order to remove the need to prefix the call with `ChangeExtension'.{% endinfo %}
 
 # Considerations
 
