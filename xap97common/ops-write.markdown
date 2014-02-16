@@ -1,3 +1,5 @@
+{%anchor write%}
+
 
 # The Write Operation
 {%section%}
@@ -172,6 +174,8 @@ When updating an object which already exists in the space, in some scenarios it 
 {% info %}
 Since in most scenarios the previous value is irrelevant, the default behavior is not to return it (i.e. `LeaseContext.getObject()` return null). The `RETURN_PREV_ON_UPDATE` modifier is used to indicate the previous value should be returned.
 {%endinfo%}
+
+{%anchor writeAsynchronous%}
 
 #### Asynchronous write
 {%section%}

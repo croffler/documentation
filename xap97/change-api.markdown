@@ -24,6 +24,8 @@ Thus reducing required network traffic between the client and the space, and the
 Moreover, using this API also can prevent the need of reading the existing object prior to the change operation because the change operation can specify how to change the existing property without knowing its current value. For instance, implementing atomic [Counters](./counters.html) can be done by increasing a counter property of an integer property by some delta. Another example would be to add a value to a collection and so on.
 The change API supports [transactions](./transaction-management.html) in the same way the other space operation supports it, using a transactional `GigaSpace` instance.
 
+{%anchor change%}
+
 # Example
 
 The following example demonstrates how to increase the property 'count' in a an object of type 'WordCount' with id 'the' by one.
@@ -205,6 +207,8 @@ The `getSuccesfullChanges` property contains details for objects that were succe
 The `getFailedChanges` property contains details for objects that failed being changed, the details contains information about id, version and the actual cause for failure.
 The `getErrors` property contains general failure reason for executing the change operation which do not apply to a specific object, such as not being able to access the space.
 
+{%anchor changeMultiple%}
+
 # Multiple Changes in One Operation
 
 One may apply multiple changes in one `change` operation by setting up multiple operation in the change set, this is done simply by chaining changes as follows:
@@ -314,6 +318,8 @@ there is no guarantee whether the operation succeeded or not as this mode does n
 
 1. **`ChangeModifiers.MEMORY_ONLY_SEARCH`** - Search for matching entries in cache memory only (do not use the underlying external data source). However, any changes done on the matches entries
 will propagate to the underlying external data source.
+
+{%anchor asynchronousChange%}
 
 # Asynchronous Change
 {%section%}

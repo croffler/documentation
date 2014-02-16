@@ -12,74 +12,124 @@ weight: 1000
 # Overview
 
 When a client connects to a space, a proxy is created that holds a connection to the space. All client interaction is performed through this proxy.
-This proxy provides a simpler space API using the [GigaSpace](http://www.gigaspaces.com/docs/JavaDoc{% currentversion %}/index.html) interface.
-This proxy is created with a Space URL and optional parameters.
-
-# Space URL
-
-A **Space URL** is a string that represents an address of a space. In short, there are two forms of space URLs:
-
-* **Embedded** (e.g. `/./mySpace`) - Find an embedded (in-process) space called *mySpace*. If it doesn't exist it will be created automatically.
-* **Remote** (e.g. `jini://*/*/mySpace`) - Find a remote space (hosted outside this process) called *mySpace*. If it doesn't exist an exception will be thrown.
+The proxy provides a simpler space API using the [GigaSpace](http://www.gigaspaces.com/docs/JavaDoc{% currentversion %}/index.html) interface.
+It is created with a Space URL and optional parameters.
 
 
-### Embedded Space
+# The Space URL
 
-An **Embedded** space is a space that is hosted in your process. The URL format for locating such a space is:
-{% highlight xml %}
-/./<spaceName><?key1=val1><&keyN=valN>
-{% endhighlight %}
+In order to locate a space you need to specify its URL. The SpaceURL is used as part of the space proxy and is set using the UrlSpaceFactoryBean.
 
-For example, to find an embedded space called `mySpace` use `/./mySpace`.
+The general format of the space URL is:
 
-If the requested space does not exist, it is automatically created and returned. If you wish to look for an existing space only, use `create=false` property (e.g. `/./foo?create=false`) - this will throw an exception if the requested space does not exist.
+{%highlight xml%}
+<protocol>://<host name>:<port>/<container name>/<space name>?<properties>
+{%endhighlight%}
 
-### Remote Space
+The following parameters can be defined:
 
-A **Remote** space is a space that is hosted in a different process. The URL format for locating such a space is:
+{: .table .table-bordered}
+| Name | Description |
+|:-----|:------------|
+| Protocol | `[jini](java)`{% wbr %}- Jini -- Remote access using Jini for lookup{% wbr %}- Java -- Local (embedded) access |
+| Host name/IP | The machine host name/IP running the space container. May be \* when Jini is used as a protocol. In this case the space is located using multicast or unicast with search path. |
+| Port | The Jini lookup port. If no port is specified the default port (10098) will be used |
+| Container Name | The name of the container that holds the space. May be \* when Jini is used as a protocol. In this case the container will be ignored when performing lookup and the space will be searched regardless of the container that holds it. |
+| Space Name | The space name to search. The same name defined when space has been created via the Space browser or the `createSpace` utility. |
+| [Properties String](#url properties) | (Optional) named value list of special properties. |
 
-{% highlight xml %}
-jini://<hostName>:<port>/<containerName>/<spaceName><?key1=val1><&keyN=valN>
-{% endhighlight %}
+{% note %}
+Make sure your network and machines running GigaSpaces are configured to have multicast enabled. See the [How to Configure Multicast](./how-to-configure-multicast.html) section for details on how to enable multicast.
+{%endnote%}
 
-For example, to find a remote space called `foo` use `jini://*/*/mySpace`.
+### Examples
 
-Let's examine that format:
+{%panel bgColor=white %}
 
-* `jini://` - The prefix indicates to search for the space using the *JINI Lookup Service* protocol.
-* `<hostName>:<port>` - Address of the JINI Lookup Service. Use `*` for multicast search, or specify a list of hostnames/ip addresses.
-* `<containerName>` - Indicates a specific member in the cluster to find. Use `*` for finding any cluster member.
-* `<spaceName>` - Name of space to find.
+**Accessing Remote Space Using Jini Lookup Service - Unicast Discovery**{%wbr%}
+jini://hostname/*/myspace{%wbr%}
+jini://mylookuphost/mycontainername/myspace
 
 
-jini://*/myhost:3400_myContainer2_mySpace
+**Accessing Remote Space Using the Jini Lookup Service - Multicast Discovery**{%wbr%}
+jini://*/mycontainername/myspace{%wbr%}
+jini:////myspace{%wbr%}
 
+
+**Starting Embedded Space Using the Java Protocol**{%wbr%}
+java://containerHostName:port/myContainerName/spaceName{%wbr%}
+/./mySpace (which translates to java://localhost:10098/containerName/mySpace?schema=default){%wbr%}
+/./mySpace?schema=cache (which translates to java://localhost:10098/containerName/mySpace?schema=cache)
+
+
+**Distributed Unicast-Based Lookup Service Support**{%wbr%}
+In environments that do not support multicast, you can use the `locators` space URL property to instruct the started space or a client to locate the Jini Lookup Service on specific host names and ports.{%wbr%}
+
+The locators can have a comma-delimited lookup hosts list:{%wbr%}
+
+The following URL formats are supported:{%wbr%}
+
+jini://*/*/space_name?locators=h1:port,h2:port,h3:port{%wbr%}
+jini://host1:port1,....host n:port n/container-name/space_name {%wbr%}
+jini://host1:port1,....host n:port n/container-name/space_name?locators=h1:port,h2:port,h3:port{%wbr%}
+jini://host1:port1/container-name/space name?locators=h1:port,h2:port,h3:port {%wbr%}
+{%endpanel%}
+
+###  "." Space Container Notation
+
+The Space URL uses the following notation to start a space: `/./<Space Name>`
+For example: `/./mySpace`
+
+When using that space URL the system will instantiate (create) a space instance named `mySpace` using the default schema configuration. The default schema is set to transient space configuration and it is equivalent to using the following URL:
+    java://localhost:10098/mySpace_container/mySpace?schema=default
+
+{% tip %}
+You can use "." as the container name in the space URL. A value of "." as the container name will be translated to `<space name>_container` name. In the above example the container name is explicitly defined as `mySpace_container`.
+{% endtip %}
+
+When a URL is provided without the protocol (java) and host name (localhost), the following URL is created /./mySpace as
+    java://localhost:10098/mySpace_container/mySpace?schema=default
+
+{%anchor url properties%}
 
 # URL Properties
 
-The space URL supports the following basic properties:
-
+The following are optional property string values:
 
 {: .table .table-bordered}
-|XML Property|NameSpace Property|Description|Default|Time Unit
-|:-----------|:-----------------|:----------|:------|:--------|
-|lookupGroups|lookup-groups|The Jini Lookup Service group to use when running in multicast discovery mode. you may specify multiple groups comma separated| gigaspaces-X.X.X-XAP<Release>-ga | |
-|lookupLocators|lookup-locators|The Jini Lookup locators to use when running in unicast discovery mode. In the form of: host1:port1,host2:port2.| | |
-|lookupTimeout|lookup-timeout|The max timeout in milliseconds to use when running in multicast discovery mode to find a lookup service| 5000 | milliseconds |
-|schema|schema|The schema type to use| |   |
-|create| |||
-|versioned|versioned| indicates if the space supports versioning |  | |
-| noWriteLease|no-write-lease|  |  | |
-| mirror| mirror| |  | |
-| fifo|fifo|  |  | |
-| registerForSpaceModeNotification|register-for-space-mode-notification| |  | |
-| spaceDataSource|space-data-source| |  | |
-| spaceSyncEndpoint|space-sync-endpoint|  |  | |
-| enableMemberAliveIndicator|enable-member-alive-indicator|  |  | |
+|Property String | Description | Optional values |
+|:--------------|:----------------|:------------|
+|`create` | Creates a new space using the container's default parameters. New spaces use the default space configuration file. Example: `java://localhost:10098/containerName`{% wbr %}`/JavaSpaces?create=true` | |
+|`fifo` | Indicates that all take/write operations be conducted in FIFO mode. Default is false. Example: `jini://localhost:10098/containerName`{% wbr %}`/JavaSpaces?fifo=true` | `false` |
+|`groups` | The Jini Lookup Service group to find container or space using multicast. Example: `jini://*/containerName/spaceName?groups=grid`{% wbr %}{% infosign %} The default value of the `LOOKUPGROUPS` variable is the GigaSpaces version number, preceded by `XAP`. For example, in GigaSpaces XAP 6.0 the default lookup group is `XAP6.0`. This is the lookup group which the space and Jini Transaction Manager register with, and which clients use by default to connect to the space.{% wbr %}{% exclamation %} Jini groups are irrelevant when using unicast lookup discovery -- they are relevant only when using multicast lookup discovery. If you have multiple spaces with the same name and you are using unicast lookup discovery, you might end up getting the wrong proxy. In such a case, make sure you have a different lookup for each space, where each space is configured to use a specific lookup. A good practice is to have different space names. | `Group name` |
+|`locators` | Instructs the started space or a client to locate the Jini Lookup Service on specific host name and port. For more details please refer to [How to Configure Unicast Discovery](./how-to-configure-unicast-discovery.html#HowtoConfigureUnicastDiscovery-Configuringthelookuplocatorsproperty) page. | |
+|`updateMode` | Push or pull update mode. Example: {%wbr%}`jini://localhost:10098/containerName /JavaSpaces?useLocalCache&updateMode=1` | `UPDATE_`{% wbr %} `MODE`{% wbr %} `_PULL`{% wbr %} `= 1` {% wbr %} `UPDATE_`{% wbr %} `MODE`{% wbr %} `_PUSH`{% wbr %} `= 2` |
+|`security`{% wbr %} `Manager` | When false, `SpaceFinder` will not initialize RMISecurityManager. Default is `true`. Example: `jini://localhost:10098/containerName`{% wbr %} `/JavaSpaces?securityManager=false` | |
+|`timeout` | The max timeout in \[ms\] to find a Container or Space using multicast {% wbr %} `jini://` protocol. Default: 5000\[ms\] Example: `jini://<code>*</code>/containerName`{% wbr %} `/JavaSpaces?timeout=10000` | |
+|`useLocalCache` | Turn Master-Local Space mode.By default Master-Local mode is turned off. To enable master local have the `useLocalCache` as part of the URL |  |
+|`versioned` | When false, optimistic lock is disabled. In a local cache and views the default is `true`, otherwise the default value is `false`. Example: `jini://localhost:10098/containerName/JavaSpaces?versioned=false` | |
+|`clustername` | The cluster name to lookup using multicast. The returned object is a clustered proxy. | |
+|`clustergroup` | The cluster group to lookup using multicast. The returned object is a clustered proxy. | |
+|`cluster_schema` | The cluster schema XSL file name to be used to setup a cluster config on the fly in memory. If the `?cluster_schema option` is passed e.g. `?cluster_schema=sync_replication`, the system will use the `sync_replication-cluster-schema.xsl` together with a cluster Dom which will be built using user's inputs on regards # of members, # of backup members etc. | |
+|`schema` | Using the schema flag, the requested space schema name will be loaded/parsed while creating an embedded space. If the space already has configuration file then the requested schema will not be applied and the that file exist, it will overwrite the default configuration defined by the schema. Note that when using the option ?create with java:// protocol, the system will create a container, space and use the default space configuration schema file (default-space-schema.xml) | |
+|`total_members` | The `total_members` attribute in the space URL stands for the total number of cache members within the cache cluster.{% wbr %}The number is used to create the list of members participating in the cluster on the fly based on the cache name convention. This pattern is used to avoid the need for creating a cluster topology file. {% wbr %}The number of actual running cache instances can vary dynamically between `1<=total_members`.{% wbr %}The format of the `total_members` = number of primary instances, number of backup instances per primary. In this example the value is 4,2 which means that this cluster contains up to 4 primary instances each containing 2 backup instances. The backup\_id is used to define whether the instance is a backup instance or not.{% wbr %}If this attribute is not defined the instance will be considered a primary instance. The container name will be translated in this case to \[cache name\]\_container\[id\]\[backup_id\].{% wbr %}In this case it will be expanded to mySpace_container1\_1 | |
+|`backup_id` | Used in case of Partitioned Cache (when adding backup to each partition). The backup_id is used to define whether the instance is a backup instance or not. If this attribute is not defined the instance will be considered a primary cache instance.{% wbr %}The container name will be translated in this case to \[cache name\]_container\[id\]_\[backup_id\].{% wbr %} In this case it will be expanded to mySpace_container1_1. | |
+|`NOWriteLease` | If true - Lease object would not return from the write/writeMultiple operations. Default: false | |
+|`id` | The id attribute is used to distinguish between cache instances in this cluster. | |
+|`properties` | if properties property is used as part of the URL space, space and container schema will be loaded and the properties listed as part of the properties file (`[prop-file-name].properties`) which contains the values to override the schema space/container/cluster configuration values that are defined in the schema files.{% wbr %}Another benefit of using the ?properties option is when we want to load system properties while VM starts or set SpaceURL attributes. See /config/gs.properties file as a reference. | |
+|`mirror` | When setting this URL property it will allow the space to connect to the Mirror service to push its data and operations for asynchronous persistency.{% wbr %}Example:{% wbr %}`/./JavaSpace?cluster_schema=sync_replicated&mirror`{% wbr %} Default: no mirror connection | |
+
+Example for space URL using options:
+
+{% highlight java %}
+jini://*/*/mySpace?useLocalCache&versioned=false
+/./mySpace?cluster_schema=partitioned&total_members=4&id=1
+{% endhighlight %}
+
 
 The `UrlSpaceFactoryBean` allows you to set different URL properties, either explicitly using explicit properties, or using a custom `Properties` object. All of the current URL properties are exposed using explicit properties, in order to simplify the configuration.
 
-Here is an example of a space working in FIFO mode, using specific lookup groups.
+Here is an example of a space working in FIFO mode, using specific lookup groups:
 
 {% inittab os_simple_space|top %}
 {% tabcontent Namespace %}

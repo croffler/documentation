@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  The Space
+title:  The Space Interface
 categories: XAP97
 weight: 150
 parent: programmers-guide.html
@@ -25,9 +25,7 @@ The space is accessed via a programmatic interface which supports the following 
 
 {%learn%}./the-space-operations.html{%endlearn%}
 
-The space proxy is created through the `UrlSpaceConfigurer`. Several configuration parameters are available.
-
-{%learn%}./the-space-configuration.html{%endlearn%}
+The space proxy is created through the `UrlSpaceConfigurer`. Several configuration parameters are available.  {%learn%}./the-space-configuration.html{%endlearn%}
 
 
 # Embedded Space

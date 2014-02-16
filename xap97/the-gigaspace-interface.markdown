@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  The Space Interface
-categories: XAP97
+categories:
 parent: programmers-guide.html
 weight: 200
 ---

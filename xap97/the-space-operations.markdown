@@ -16,35 +16,60 @@ XAP provides a simple space API using the [GigaSpace](http://www.gigaspaces.com/
 
 The interface includes the following main operations:
 
-Write and update operations:
-
-- write
-- writeMultiple
-- change
-- asyncChange
-
-Read operations:
-
-- readById
-- readByIds
-- readIfExistsById
-- readMultiple
-- readIfExists
-- asyncRead
-
-Take operations:
-
-- take
-- takeMultiple
-- takeIfExistsById
-- takeIfExists
-- asyncTake
-
-- clear
-- count
+{%section%}
+{%column width=50% %}
+{%panel bgColor=white | title=Write operations:%}
+With these operations objects are written into the space
+[write](#write){%wbr%}
+[writeMultiple](#writeMultiple){%wbr%}
+[asynchronous write](#writeAsynchronous)
+{%endpanel%}
+{%endcolumn%}
+{%column width=45% %}
+{%panel bgColor=white | title=Change operations:%}
+[change](#change)  one object in space{%wbr%}
+[changeMultiple](#changeMultiple) objects in space {%wbr%}
+[asynchronous change](#asynchronousChange) of objects
+{%endpanel%}
+{%endcolumn%}
+{%endsection%}
 
 
+{%section%}
+{%column width=50% %}
+{%panel bgColor=white |  title=Read operations:%}
+[readById]() from the space{%wbr%}
+[readByIds]() from the space{%wbr%}
+[readMultiple]() objects from the space {%wbr%}
+[read asynchronous]() from the space {%wbr%}
+[read if exists]() {%wbr%}
+[read if exists by id]()
+{%endpanel%}
+{%endcolumn%}
+{%column width=45% %}
+{%panel bgColor=white |  title=Take operations:%}
+[takeById]() remove object by id from space{%wbr%}
+[takeByIds]() remove objects by ids from space{%wbr%}
+[takeMultiple]() remove objects from space {%wbr%}
+[take asynchronous](){%wbr%}
+[take if exists]() {%wbr%}
+[take if exists by id]()
+{%endpanel%}
+{%endcolumn%}
+{%endsection%}
 
+{%section%}
+{%column width=50% %}
+{%panel bgColor=white |  title=Other operations:%}
+[clear]() an object type from space {%wbr%}
+[count]() objects in space
+{%endpanel%}
+{%endcolumn%}
+{%column width=45% %}
+{%endcolumn%}
+{%endsection%}
+
+{%comment%}
 
 {: .table .table-bordered}
 |[Id Based operations](./id-queries.html)|[Batch operations](#Batch Operations)|[Asynchronous operations](#Asynchronous Operations)|Data Count operations|
@@ -56,6 +81,7 @@ Take operations:
 |:--|:--|:--|:--|
 |read{% wbr %}readMultiple{% wbr %}[iterator](./paging-support-with-space-iterator.html)|write{% wbr %}writeMultiple{% wbr %}   [change](./change-api.html) |execute{% wbr %}executorBuilder|clean{% wbr %}clear{% wbr %}take{% wbr %}takeMultiple|
 
+{%endcomment%}
 
 # Simpler API
 
@@ -63,16 +89,13 @@ The `GigaSpace` interface provides a simpler space API by utilizing Java 5 gener
 
 {% highlight java %}
 public interface GigaSpace {
-
     <T> LeaseContext<T> write(T entry) throws DataAccessException;
     // ....
-
     <T> T read(ISpaceQuery<T> query, Object id)throws DataAccessException;
-
     // ......
     <T> T take(T template) throws DataAccessException;
-
     <T> T take(T template, long timeout) throws DataAccessException;
+    // ......
 }
 {% endhighlight %}
 
