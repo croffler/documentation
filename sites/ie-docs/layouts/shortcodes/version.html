@@ -1,0 +1,2 @@
+{{if in .Page.Permalink "003"}}{{index .Page.Site.Params.ie003 (.Get 0)}}
+{{else if in .Page.Permalink "010"}}{{index .Page.Site.Params.ie010 (.Get 0)}}{{else if in .Page.Permalink "011"}}{{index .Page.Site.Params.ie011 (.Get 0) }}{{end}}

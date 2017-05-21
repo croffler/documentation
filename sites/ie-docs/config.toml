@@ -1,0 +1,33 @@
+baseurl = "http://insightedge.io/"
+languageCode = "en-us"
+title = "IE Documentation"
+theme="ie-theme"
+uglyurls=true
+
+contentDir= "sites/ie-docs/content"
+publishDir= "sites/ie-docs/public"
+
+
+[blackfriday]
+# https://github.com/spf13/hugo/blob/master/docs/content/overview/configuration.md#configure-blackfriday-rendering
+plainIdAnchors=true
+
+[params]
+    latest_ie_release= "0.3"
+
+[params.ie003]
+
+[params.ie011]
+    ie-version="1.1.0"
+    java-version="8"
+    scala-version="2.11.8"
+    spark-version="2.0.0"
+
+[params.ie010]
+    ie-version="1.0.0"
+    java-version="7"
+    scala-version="2.10.4"
+    spark-version="1.6.0"
+
+
+ 
