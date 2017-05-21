@@ -1,3 +1,0 @@
-documentation
-=============
-Testing the docs
